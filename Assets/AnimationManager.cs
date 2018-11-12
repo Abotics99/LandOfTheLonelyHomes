@@ -54,7 +54,7 @@ public class AnimationManager : MonoBehaviour {
         Vector3 oldForward = animOrigin.forward;
         if(playerManager.getLookTarget() != null)
         {
-            Quaternion newRotation = Quaternion.LookRotation(Vector3.RotateTowards(animOrigin.forward, (playerManager.getLookTarget().position - transform.position).normalized, turnSpeed * 0.05f * Time.deltaTime, 0.0f), Vector3.up);
+            Quaternion newRotation = Quaternion.LookRotation(Vector3.RotateTowards(animOrigin.forward, (playerManager.getLookTarget().position - transform.position).normalized, turnSpeed * 0.1f * Time.deltaTime, 0.0f), Vector3.up);
             animOrigin.rotation = newRotation;
             leanAngles.y = Vector3.Dot(-animOrigin.right, velocity.normalized) * sideLeanMagnitude * velocity.magnitude;
             leanAngles.x = (velocity.magnitude * forwardLeanMagnitude * Vector3.Dot(animOrigin.forward, velocity.normalized));
@@ -69,7 +69,7 @@ public class AnimationManager : MonoBehaviour {
             animOrigin.rotation = Quaternion.Euler(leanAngles.x, newRotation.eulerAngles.y, leanAngles.y);
         }
 
-        lookTarget.transform.position = transform.position + new Vector3(0,lookUpHeight,0) + (velocity*10) + transform.forward;
+        lookTarget.transform.position = transform.position + new Vector3(0,lookUpHeight,0) + (playerController.getCamBasedMovement()* 10) + transform.forward;
 
         vertSpringVelocity += (transform.position.y - verticalSpringPos) * vertSpringiness;
 
@@ -125,7 +125,7 @@ public class AnimationManager : MonoBehaviour {
         }
 
         //headLerp and going to target
-        headIKLookPos = Vector3.Lerp(headIKLookPos,headIKTarget,0.1f);
+        headIKLookPos = Vector3.Lerp(headIKLookPos,headIKTarget,0.20f);
         anim.SetLookAtPosition(headIKLookPos);
 
         //armLerp and going to target

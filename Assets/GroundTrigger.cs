@@ -10,6 +10,7 @@ public class GroundTrigger : MonoBehaviour {
     public float radius = 0.5f;
     public float length = 1;
     Vector3 groundNormal;
+    public float groundSlope = 0;
 	// Use this for initialization
 	void Start () {
 		
@@ -60,6 +61,7 @@ public class GroundTrigger : MonoBehaviour {
 
     public float getSlope()
     {
-        return Vector3.Dot(groundNormal,animManager.transform.forward);
+        groundSlope = Mathf.Lerp(groundSlope, Vector3.Dot(groundNormal, animManager.transform.forward), 0.5f);
+        return groundSlope;
     }
 }

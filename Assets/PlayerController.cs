@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour {
 
     Transform camPos;
-    CharacterController controller;
+    RigidBodyCharacterController controller;
     public AnimationManager animationManager;
     public GroundTrigger groundTrigger;
     public WaterSensor waterSensor;
@@ -18,13 +18,13 @@ public class PlayerController : MonoBehaviour {
     public float maxRunSpeed = 1;
     public float accelerationLerp = 0.1f;
     public float jumpHeight;
-    public float gravity = 20f;
     public float bouyancy = 1;
     public float waterFriction = 0.9f;
 
     bool isFloatable = true;
 
     Vector3 velocity;
+    Vector2 camBasedMovement;
     Vector3 lastVelocity;
     Vector3 acceleration;
     Vector2 movement;
@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour {
     // Use this for initialization
     void Start () {
         camPos = Camera.main.transform;
-        controller = GetComponent<CharacterController>();
+        controller = GetComponent<RigidBodyCharacterController>();
         playerManager = transform.root.gameObject.GetComponent<PlayerManager>();
     }
 	
@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour {
 
         Vector2 playerInput = new Vector2(Input.GetAxis("Horizontal"), -Input.GetAxis("Vertical")); // get raw player stick direction
 
-        if (playerManager.dialogActive)
+        if (playerManager.dialogActive) 
         {
             playerInput = Vector2.zero;
         }
@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour {
 
         moveSpeed = moveSpeed * (1-Mathf.Abs(groundTrigger.getSlope()/2));
 
-        Vector2 camBasedMovement = new Vector3(playerInput.y * Mathf.Sin(forwardDir) + playerInput.x * Mathf.Sin(forwardDir - Mathf.PI / 2), playerInput.y * Mathf.Cos(forwardDir) + playerInput.x * Mathf.Cos(forwardDir - Mathf.PI / 2)).normalized * moveSpeed; //calcualate the movement vector with player input and the camera forward vector
+        camBasedMovement = new Vector3(playerInput.y * Mathf.Sin(forwardDir) + playerInput.x * Mathf.Sin(forwardDir - Mathf.PI / 2), playerInput.y * Mathf.Cos(forwardDir) + playerInput.x * Mathf.Cos(forwardDir - Mathf.PI / 2)).normalized * moveSpeed; //calcualate the movement vector with player input and the camera forward vector
 
         if (playerManager.grabbingObject)
         {
@@ -77,10 +77,9 @@ public class PlayerController : MonoBehaviour {
         //jumping mechanics and gravity
         if (groundTrigger.isGrounded())
         {
-            velocity.y = -0.01f;
             if (Input.GetKeyDown(KeyCode.Space) && !playerManager.grabbingObject)
             {
-                velocity.y = jumpHeight;
+                controller.jump(jumpHeight);
             }
         }
         else if(isFloatable && waterSensor.getOceanSurface(transform) > 0)
@@ -89,11 +88,7 @@ public class PlayerController : MonoBehaviour {
             velocity.y = velocity.y * waterFriction;
         }
 
-        if(!isGrounded())
-        {
-            velocity.y -= gravity * Time.deltaTime;
-        }
-
+        //velocity.y = 0;
         controller.Move(velocity);
 	}
 
@@ -106,6 +101,11 @@ public class PlayerController : MonoBehaviour {
     public Vector3 getVelocity()
     {
         return velocity;
+    }
+
+    public Vector3 getCamBasedMovement()
+    {
+        return new Vector3(camBasedMovement.x,0,camBasedMovement.y);
     }
 
     public Vector3 getAcceleration()
